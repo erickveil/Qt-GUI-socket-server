@@ -15,7 +15,7 @@ void SockListen::listenLoop()
     QTcpServer server;
 
     if(server.listen(QHostAddress::Any,port)){
-        printf("%s: listen() succeeded\n",__PRETTY_FUNCTION__);
+        printf("%s: listen() succeeded on port %d\n",__PRETTY_FUNCTION__,port);
 
         while(server.isListening() && listen_state)
         {
@@ -30,10 +30,10 @@ void SockListen::listenLoop()
                 usleep(100000);
             }
         }
-        printf("%s: listen state interrupted.",__PRETTY_FUNCTION__);
+        printf("%s: listen state interrupted.\n",__PRETTY_FUNCTION__);
     }
     else{
-        printf("%s: listen operation failed",__PRETTY_FUNCTION__);
+        printf("%s: listen operation failed\n",__PRETTY_FUNCTION__);
     }
 }
 
@@ -80,6 +80,7 @@ QString SockListen::readLine(QTcpSocket *socket)
 void SockListen::writeResponse(QString line)
 {
     printf("%s: Obtained from socket: %s",__PRETTY_FUNCTION__,line.toStdString().c_str());
+    emit receivedLine(line);
 }
 
 int SockListen::waitForInput( QTcpSocket *socket )

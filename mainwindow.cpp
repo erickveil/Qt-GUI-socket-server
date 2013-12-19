@@ -21,6 +21,7 @@ void MainWindow::initThreads()
 
     listener_obj=new SockListen(&listen_thread);
     listener_obj->moveToThread(&listen_thread);
+    connect ( listener_obj, SIGNAL(receivedLine(QString)), this, SLOT(eventDataObtainedFromSocket(QString)) );
     //listen_thread.start();
 
     monitor_obj=new ThreadMonitor(&listen_thread);
@@ -42,6 +43,7 @@ void MainWindow::on_bu_run_clicked()
         listen_thread.exit();
     }
     else{
+        listener_obj->port=this->ui->tb_port->text().toUShort();
         listen_thread.start();
     }
 
@@ -57,4 +59,9 @@ void MainWindow::eventListenerStateChange(bool state)
         statusBar()->showMessage("Running");
     }
 
+}
+
+void MainWindow::eventDataObtainedFromSocket(QString socket_string)
+{
+    this->ui->tb_out->setPlainText(socket_string);
 }

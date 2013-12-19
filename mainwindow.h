@@ -26,6 +26,7 @@ public:
 
 public slots:
     void eventListenerStateChange(bool state);
+    void eventDataObtainedFromSocket(QString socket_string);
 
 private slots:
     void on_MainWindow_destroyed();
