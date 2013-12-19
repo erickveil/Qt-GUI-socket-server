@@ -12,6 +12,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    // shut down the threads before leaving
+    listener_obj->setState(false);
+    listen_thread.exit();
+    monitor_thread.exit();
+
+    monitor_thread.wait();
+    listen_thread.wait();
+
     delete ui;
 }
 
@@ -32,8 +40,7 @@ void MainWindow::initThreads()
 
 void MainWindow::on_MainWindow_destroyed()
 {
-    //monitor_thread.exit();
-    //listen_thread.exit();
+
 }
 
 void MainWindow::on_bu_run_clicked()
