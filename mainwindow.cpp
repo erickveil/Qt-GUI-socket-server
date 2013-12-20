@@ -14,9 +14,6 @@ MainWindow::~MainWindow()
 {
     // shut down the threads before leaving
     listen_thread.exit();
-    //monitor_thread.exit();
-
-    //monitor_thread.wait();
     listen_thread.wait();
 
     delete ui;
@@ -38,8 +35,6 @@ void MainWindow::initThreads()
 
     monitor_obj=new ThreadMonitor(&listen_thread);
     connect ( monitor_obj, SIGNAL(threadStateChanged(bool)), this, SLOT(eventListenerStateChange(bool)) );
-    //monitor_obj->moveToThread(&monitor_thread);
-    //monitor_thread.start();
 }
 
 void MainWindow::on_MainWindow_destroyed()

@@ -13,6 +13,11 @@ SockListen::SockListen(QThread *listen_thread)
     connect ( listen_thread, SIGNAL(finished()), this, SLOT(eventListenThreadFinished()) );
 }
 
+/**
+ * @brief SockListen::startListener
+ * Starts aQTcpServer, which listens on the thread loop and emits a signal
+ * whenever it receives data.
+ */
 void SockListen::startListener()
 {
     server=new QTcpServer();
@@ -28,6 +33,12 @@ void SockListen::startListener()
     }
 }
 
+/**
+ * @brief SockListen::eventNewConnection
+ * [SLOT]
+ * Receives the connected signal from QTcpSocket.
+ * Starts scooping data from the socket.
+ */
 void SockListen::eventNewConnection()
 {
     printf("%s: got a TCP connection\n",__PRETTY_FUNCTION__);
@@ -35,6 +46,11 @@ void SockListen::eventNewConnection()
     getSocketdata(client);
 }
 
+/**
+ * @brief SockListen::getSocketdata
+ * @param client
+ * Calls readline and emits the data back to the UI in a signal.
+ */
 void SockListen::getSocketdata(QTcpSocket *client)
 {
     QString line;
@@ -46,6 +62,14 @@ void SockListen::getSocketdata(QTcpSocket *client)
     }
 }
 
+/**
+ * @brief SockListen::readLine
+ * @param socket
+ * @return
+ * Empty's the socket of its data, one byte at a time,
+ * converting each to a character and appending it to a string,
+ * until there are none left to be read.
+ */
 QString SockListen::readLine(QTcpSocket *socket)
 {
     QString line="";
@@ -76,41 +100,65 @@ QString SockListen::readLine(QTcpSocket *socket)
     return line;
 }
 
+/**
+ * @brief SockListen::writeResponse
+ * @param line
+ *This is where you define what you do with socket data.
+ *Here, we log it, then emit it in a signal for the UI to use.
+ */
 void SockListen::writeResponse(QString line)
 {
     printf("%s: Obtained from socket: %s",__PRETTY_FUNCTION__,line.toStdString().c_str());
     emit receivedLine(line);
 }
 
+/**
+ * @brief SockListen::waitForInput
+ * @param socket
+ * @return
+ *Blocks between a client connection, and the delivery of bytes from the kernel.
+ */
 int SockListen::waitForInput( QTcpSocket *socket )
 {
     int bytesAvail = -1;
 
-    while (socket->state() == QAbstractSocket::ConnectedState && bytesAvail < 0) {
-
-        if (socket->waitForReadyRead( 100 )) {
+        if (socket->waitForReadyRead( 10000 )) {
             bytesAvail = socket->bytesAvailable();
         }
-        else {
-            // Altered from windows.h Sleep()
-            usleep( 500000 );
+        else{
+            printf("%s: Connection timed out with no data.",__PRETTY_FUNCTION);
         }
-
-    }
 
     return bytesAvail;
 }
 
+/**
+ * @brief SockListen::eventListenThreadStarted
+ *[SLOT]
+ * When the thread starts, so does the listener.
+ */
 void SockListen::eventListenThreadStarted()
 {
     startListener();
 }
 
+/**
+ * @brief SockListen::eventListenThreadFinished
+ *[SLOT]
+ * When the thread ends, so does the listener.
+ */
 void SockListen::eventListenThreadFinished()
 {
     server->close();
 }
 
+/**
+ * @brief SockListen::eventListenThreadTerminated
+ *[SLOT]
+ * I've noticed a non-fatal warning thrown that insists that the
+ * terminated signal does not exist in QThread, despite its documentation.
+ * This slot remains unconnected.
+ */
 void SockListen::eventListenThreadTerminated()
 {
     server->close();
