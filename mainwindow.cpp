@@ -13,11 +13,10 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     // shut down the threads before leaving
-    //listener_obj->setState(false);
     listen_thread.exit();
-    monitor_thread.exit();
+    //monitor_thread.exit();
 
-    monitor_thread.wait();
+    //monitor_thread.wait();
     listen_thread.wait();
 
     delete ui;
@@ -39,8 +38,8 @@ void MainWindow::initThreads()
 
     monitor_obj=new ThreadMonitor(&listen_thread);
     connect ( monitor_obj, SIGNAL(threadStateChanged(bool)), this, SLOT(eventListenerStateChange(bool)) );
-    monitor_obj->moveToThread(&monitor_thread);
-    monitor_thread.start();
+    //monitor_obj->moveToThread(&monitor_thread);
+    //monitor_thread.start();
 }
 
 void MainWindow::on_MainWindow_destroyed()
@@ -56,7 +55,6 @@ void MainWindow::on_MainWindow_destroyed()
 void MainWindow::on_bu_run_clicked()
 {
     if(listen_thread.isRunning()){
-        //listener_obj->setState(false);
         listen_thread.exit();
     }
     else{

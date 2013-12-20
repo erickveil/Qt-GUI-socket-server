@@ -19,7 +19,6 @@ public:
     ~MainWindow();
 
     QThread listen_thread;
-    QThread monitor_thread;
 
     SockListen *listener_obj;
     ThreadMonitor *monitor_obj;

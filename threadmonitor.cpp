@@ -3,8 +3,6 @@
 ThreadMonitor::ThreadMonitor(QThread* watch){
 
     watch_thread=watch;
-    //last_state=true;
-
     startLoop();
 }
 
