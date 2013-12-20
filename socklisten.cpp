@@ -3,15 +3,17 @@
   */
 #include "socklisten.h"
 
+/**
+ * @brief SockListen::SockListen
+ * @param listen_thread
+ */
 SockListen::SockListen(QThread *listen_thread)
 {
-    listen_state=true;
-
     connect ( listen_thread, SIGNAL(started()), this, SLOT(eventListenThreadStarted()) );
     connect ( listen_thread, SIGNAL(finished()), this, SLOT(eventListenThreadFinished()) );
 }
 
-void SockListen::listenLoop()
+void SockListen::startListener()
 {
     server=new QTcpServer();
 
@@ -84,7 +86,7 @@ int SockListen::waitForInput( QTcpSocket *socket )
 {
     int bytesAvail = -1;
 
-    while (socket->state() == QAbstractSocket::ConnectedState && listen_state && bytesAvail < 0) {
+    while (socket->state() == QAbstractSocket::ConnectedState && bytesAvail < 0) {
 
         if (socket->waitForReadyRead( 100 )) {
             bytesAvail = socket->bytesAvailable();
@@ -101,8 +103,7 @@ int SockListen::waitForInput( QTcpSocket *socket )
 
 void SockListen::eventListenThreadStarted()
 {
-    listen_state=true;
-    listenLoop();
+    startListener();
 }
 
 void SockListen::eventListenThreadFinished()
