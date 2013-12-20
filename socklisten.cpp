@@ -8,33 +8,29 @@ SockListen::SockListen(QThread *listen_thread)
     listen_state=true;
 
     connect ( listen_thread, SIGNAL(started()), this, SLOT(eventListenThreadStarted()) );
+    connect ( listen_thread, SIGNAL(finished()), this, SLOT(eventListenThreadFinished()) );
 }
 
 void SockListen::listenLoop()
 {
-    QTcpServer server;
+    server=new QTcpServer();
 
-    if(server.listen(QHostAddress::Any,port)){
-        printf("%s: listen() succeeded on port %d\n",__PRETTY_FUNCTION__,port);
+    connect( server, SIGNAL(newConnection()), this, SLOT(eventNewConnection()) );
 
-        while(server.isListening() && listen_state)
-        {
-
-            if(server.waitForNewConnection(100)){
-                printf("%s: got a TCP connection\n",__PRETTY_FUNCTION__);
-                QTcpSocket *client=server.nextPendingConnection();
-                getSocketdata(client);
-            }
-
-            else{
-                usleep(100000);
-            }
-        }
-        printf("%s: listen state interrupted.\n",__PRETTY_FUNCTION__);
+    if(!server->listen(QHostAddress::Any,port)){
+        printf("%s: listen operation on port %d failed\n",__PRETTY_FUNCTION__,port);
     }
-    else{
-        printf("%s: listen operation failed\n",__PRETTY_FUNCTION__);
+    else
+    {
+        printf("%s: now listening on port %d\n",__PRETTY_FUNCTION__,port);
     }
+}
+
+void SockListen::eventNewConnection()
+{
+    printf("%s: got a TCP connection\n",__PRETTY_FUNCTION__);
+    QTcpSocket *client=server->nextPendingConnection();
+    getSocketdata(client);
 }
 
 void SockListen::getSocketdata(QTcpSocket *client)
@@ -51,6 +47,7 @@ void SockListen::getSocketdata(QTcpSocket *client)
 QString SockListen::readLine(QTcpSocket *socket)
 {
     QString line="";
+
     int bytesAvail = waitForInput( socket );
 
     if (bytesAvail > 0) {
@@ -106,5 +103,15 @@ void SockListen::eventListenThreadStarted()
 {
     listen_state=true;
     listenLoop();
+}
+
+void SockListen::eventListenThreadFinished()
+{
+    server->close();
+}
+
+void SockListen::eventListenThreadTerminated()
+{
+    server->close();
 }
 
