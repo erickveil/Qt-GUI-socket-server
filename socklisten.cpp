@@ -126,7 +126,7 @@ int SockListen::waitForInput( QTcpSocket *socket )
             bytesAvail = socket->bytesAvailable();
         }
         else{
-            printf("%s: Connection timed out with no data.",__PRETTY_FUNCTION);
+            printf("%s: Connection timed out with no data.",__PRETTY_FUNCTION__);
         }
 
     return bytesAvail;
